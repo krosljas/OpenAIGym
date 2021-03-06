@@ -58,7 +58,6 @@ def train_model(max_episodes=50000):
     for _ in range(100):
         collect_gameplay_experiences(env, agent, buffer)
     for epis in range(max_episodes): # Train the agent for 6000 episodes of the game
-        env.render()
         collect_gameplay_experiences(env, agent, buffer)
         gameplay_experience_batch = buffer.sample_gameplay_batch()
         loss = agent.train(gameplay_experience_batch)
@@ -66,8 +65,21 @@ def train_model(max_episodes=50000):
         if epis % 20 == 0:
             agent.update_target_network()
         print("Episode {}/{} and so far the performance is {} and loss is {}".format(epis, max_episodes, avg_reward, loss[0]))
-    env.close()
+    # env.close()
     print("Training Complete")
+    play(env, agent)
 
+def play(env, agent):
+    for i in range(10):
+        state = env.reset()
+        done = False
+        episode_reward = 0.0
+        while not done:
+            env.render()
+            action = agent.policy(state)
+            next_state, reward, done, _ = env.step(action)
+            episode_reward += reward
+            state = next_state
+        print(episode_reward)
 
-train_model()
+train_model(10000)
